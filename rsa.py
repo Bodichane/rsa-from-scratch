@@ -1,8 +1,9 @@
 import math
 import random
+import os
 
 def isPrimeNumber(num):
-    racine = math.ceil(math.sqrt(num)) 
+    root = math.ceil(math.sqrt(num)) 
     res = False
 
     if(num == 1):
@@ -10,7 +11,7 @@ def isPrimeNumber(num):
     elif(num == 2):
         return True
     else:
-        for iter in range(2, racine + 1): 
+        for iter in range(2, root + 1): 
             if(num % iter == 0):
                 res = False
                 break
@@ -101,14 +102,55 @@ def attackCommonModulus(c1, c2, e1, e2, n):
     return part1 * part2 % n
 
 
+def addPadding(message, n):
+    message_size = (message.bit_length() + 7) // 8
+    message_bytes = message.to_bytes(message_size, 'big')
+    n_size = (n.bit_length() + 7) // 8
+    n_padding = n_size - len(message_bytes) - 4
+    random_bytes = b''
+    while len(random_bytes) < n_padding:
+        b = os.urandom(1)
+        if(b != b'\x00'):
+            random_bytes += b
+
+    padded_bytes = b'\x00\x02' + random_bytes + b'\x00' + message_bytes
+    return int.from_bytes(padded_bytes, 'big')
+
+def removingPadding(padded_int, n):
+    padded_size = (n.bit_length() + 7) // 8
+    padded_bytes = padded_int.to_bytes(padded_size, 'big')
+
+    if(padded_bytes[0] == 0x00 and padded_bytes[1] == 0x02):
+        separate = padded_bytes.index(b'\x00', 2)
+        if(separate >= 2):
+            message_bytes = padded_bytes[separate + 1:]
+            return int.from_bytes(message_bytes, 'big')
+
+
+
+key = genereKeys()
+m = 42
+
+# Cipher with padding
+padded = addPadding(42, key['public'][1])
+c = cipher(padded, key['public'])
+
+# Decipher with removal padding
+decipher_padded = decipher(c, key['private'])
+m = removingPadding(padded, key['public'][1])
+
+print(f"Original: {m} -> Ciphered: {c} -> Deciphired: {m}")
+
+
+'''
 message = 42
 e1, e2 = 65537, 17
 key = genereKeys(16, e1)
 c1 = cipher(message, (e1, key['public'][1]))
 c2 = cipher(message, (e2, key['public'][1]))
 m = attackCommonModulus(c1, c2, e1, e2, key['public'][1])
-print(f"Message trouve: {m}")
-
+print(f"Message find: {m}")
+'''
 
 '''
 key = genereKeys(16, e=3)
