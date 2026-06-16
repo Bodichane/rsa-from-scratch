@@ -45,7 +45,7 @@ def inverseModulaire(e, phi):
         r_prec, r_act = r_act, r_prec - quotient * r_act
         x_prec, x_act = x_act, x_prec - quotient * x_act
         y_prec, y_act = y_act, y_prec - quotient * y_act
-    else:
+        
         return  x_prec % phi
     
 
@@ -146,7 +146,7 @@ def find(c, e, n, private_key):
 
 
 key = genereKeys()
-padded = addPadding(42, key['private'][1])
+padded = addPadding(42, key['public'][1])
 c = cipher(padded, key['public'])
 s = find(c, key['public'][0], key['public'][1], key['private'])
 print(f"first valid s : {s}")
@@ -180,7 +180,6 @@ print(f"Message find: {m}")
 '''
 key = genereKeys(16, e=3)
 message = 285
-private_key = attackSmallE
 c = cipher(message, key['public'])
 m = attackSmallE(c)
 print(f"Original: {message} -> Ciphered: {c} -> Deciphered: {m}")
