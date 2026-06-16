@@ -127,9 +127,34 @@ def removingPadding(padded_int, n):
             return int.from_bytes(message_bytes, 'big')
 
 
+def oracle(c, private_key):
+    n = private_key[1]
+    decrypted = decipher(c, private_key)
+    padded_bytes = decrypted.to_bytes((n.bit_length() + 7) // 8, 'big')
+    return padded_bytes[0] == 0x00 and padded_bytes[1] == 0x02
+
+
+def find(c, e, n, private_key):
+    s = 2
+    while True:
+        c_ = c * pow(s, e, n) % n
+
+        if(oracle(c_, private_key)):
+            return s
+        else:
+            s += 1
+
 
 key = genereKeys()
-m = 42
+padded = addPadding(42, key['private'][1])
+c = cipher(padded, key['public'])
+s = find(c, key['public'][0], key['public'][1], key['private'])
+print(f"first valid s : {s}")
+
+
+'''
+key = genereKeys()
+message = 42
 
 # Cipher with padding
 padded = addPadding(42, key['public'][1])
@@ -137,10 +162,10 @@ c = cipher(padded, key['public'])
 
 # Decipher with removal padding
 decipher_padded = decipher(c, key['private'])
-m = removingPadding(padded, key['public'][1])
+m = removingPadding(decipher_padded, key['public'][1])
 
-print(f"Original: {m} -> Ciphered: {c} -> Deciphired: {m}")
-
+print(f"Original: {message} -> Ciphered: {c} -> Deciphired: {m}")
+'''
 
 '''
 message = 42
