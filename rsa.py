@@ -1,8 +1,8 @@
-import math
-import random
+from math import ceil, sqrt
+from random import getrandbits
 
 def isPrimeNumber(num):
-    root = math.ceil(math.sqrt(num)) 
+    root = ceil(sqrt(num)) 
     res = False
 
     if(num == 1):
@@ -20,7 +20,7 @@ def isPrimeNumber(num):
  
 def generePrime(bits):
     while True:
-        num = random.getrandbits(bits)
+        num = getrandbits(bits)
 
         if(isPrimeNumber(num)):
             return num 

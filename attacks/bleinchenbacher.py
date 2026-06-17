@@ -1,4 +1,4 @@
-import os
+from os import urandom
 from rsa import cipher, decipher, genereKeys
 
 def addPadding(message, n):
@@ -8,7 +8,7 @@ def addPadding(message, n):
     n_padding = n_size - len(message_bytes) - 4
     random_bytes = b''
     while len(random_bytes) < n_padding:
-        b = os.urandom(1)
+        b = urandom(1)
         if(b != b'\x00'):
             random_bytes += b
 
