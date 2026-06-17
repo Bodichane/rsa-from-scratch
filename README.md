@@ -10,28 +10,6 @@ Utilisé pour vérifier que l'indicatrice d'Euler $\phi(n)$ et l'exposant de chi
 
 ### Inverse modulaire
 Puisque $e$ est premier avec $\phi(n)$, le théorème de Bachet-Bézout garantit l'existence de deux entiers $d$ et $k$ tels que :
-$$ed = 1 + k\phi(n)$$,
-Cela signifie que $ed \equiv 1 \pmod{\phi(n)}$, ce qui prouve que $e$ est inversible modulo $\phi(n)$. Cette propriété permet de calculer l'exposant de déchiffrement : `d = inverseModulaire(e, phi)`.
-
-### Fonction phi d'Euler $\phi(n)$
-Un entier $p > 1$ est premier si et seulement si tous les nombres de $1$ à $p - 1$ sont premiers avec $p$. On a alors $\phi(p) = p - 1$. Dans le cas de RSA, pour deux nombres premiers $p$ et $q$, on obtient :
-$$\phi(n) = (p - 1)(q - 1)$$
-
-### Exponentiation modulaire
-L'exponentiation modulaire consiste à calculer l'entier $c$ tel que :
-$$c \equiv m^e \pmod n$$
-Cette formule permet de chiffrer efficacement le message $m$ à l'aide de l'exposant $e$ et du module $n$.
-
-## Description
-Ce projet est une implémentation de l'algorithme RSA à partir de zéro, sans aucune utilisation de bibliothèques cryptographiques. Nous avons également implémenté quelques attaques pour tenter de casser cette méthode de chiffrement.
-
-## Concepts mathématiques
-
-### PGCD 
-Utilisé pour vérifier que l'indicatrice d'Euler $\phi(n)$ et l'exposant de chiffrement $e$ sont premiers entre eux. 
-
-### Inverse modulaire
-Puisque $e$ est premier avec $\phi(n)$, le théorème de Bachet-Bézout garantit l'existence de deux entiers $d$ et $k$ tels que :
 $$ed = 1 + k\phi(n)$$
 <br>Cela signifie que $ed \equiv 1 \pmod{\phi(n)}$, ce qui prouve que $e$ est inversible modulo $\phi(n)$. Cette propriété permet de calculer l'exposant de déchiffrement : `d = inverseModulaire(e, phi)`.
 
@@ -65,7 +43,7 @@ $$a \cdot e_1 + b \cdot e_2 = 1$$
 $$(c_1)^a \cdot (c_2)^b \equiv (m^{e_1})^a \cdot (m^{e_2})^b \equiv m^{a \cdot e_1 + b \cdot e_2} \equiv m^1 \equiv m \pmod n$$
 <br>Le message est ainsi intercepté sans nécessiter la connaissance des clés privées.
 
-### Attaque de Bleichenbacher (Oracle de padding PKCS#1 v1.5)
+### Attaque de Bleichenbacher (Oracle de padding PKCS#1)
 Cette attaque par canal auxiliaire (*side-channel*) se base sur un serveur agissant comme un oracle de padding. Le serveur renvoie une information (ou une erreur différente) selon que le padding du message déchiffré est valide (`True`) ou invalide (`False`). 
 L'objectif est de découvrir le message en choisissant judicieusement des entiers $s$ successifs, en envoyant au serveur le texte chiffré modifié :
 $$c' \equiv c \cdot s^e \pmod n$$
@@ -81,14 +59,14 @@ Ce projet est développé en **Python 3**. Aucune bibliothèque tierce n'est req
 ### 1. Cloner le projet
 Téléchargez le dépôt localement sur votre machine :
 ```bash
-git clone https://github.com](https://github.com/Bodichane/rsa-from-scratch/
+git clone https://github.com/Bodichane/rsa-from-scratch
 cd rsa-from-scratch
 ```
 
 ### 2. Exécuter le chiffrement/déchiffrement RSA
 Pour générer des clés, chiffrer et déchiffrer un message de démonstration :
 ```bash
-python main.py
+python rsa.py
 ```
 
 ### 3. Lancer les simulations d'attaques
@@ -110,7 +88,14 @@ Chaque attaque dispose de son propre script de démonstration pour prouver sa fa
 ## Structure du projet
 * `rsa.py` : Fonctions mathématiques de base (PGCD, inverse modulaire, exponentiation) et logique RSA.
 * `attacks/` : Dossier contenant les scripts des différentes attaques implémentées.
-* `main.py` : Point d'entrée principal pour tester le projet.
   
 ## Réflexion
-Ce projet m'a permis de comprendre les bases du chiffrement RSA, en partant de sa logique conceptuelle jusqu'aux fonctions mathématiques qui se cachent derrière.
+Ce projet m'a permis de comprendre les bases du chiffrement RSA, en partant de sa logique conceptuelle jusqu'aux fonctions mathématiques qui se cachent derrière. 
+
+J'ai rencontré des difficultés, notamment pour implémenter les fonctions `inverseModulaire()` et `addPadding()`. En développant ces fonctions, j'ai appris à utiliser de nouvelles méthodes natives de Python (telles que `bit_length()`, `to_bytes()`, `from_bytes()`, etc.). Au terme de ce projet, je suis désormais en mesure d'expliquer le fonctionnement de RSA ainsi que les attaques auxquelles il est vulnérable.
+
+## Références et Liens utiles
+* [Chiffrement RSA - Wikipédia](https://wikipedia.org)
+* [Théorème de Bachet-Bézout - Wikipédia](https://wikipedia.org)
+* [Standard PKCS 1 - Wikipedia (en)](https://wikipedia.org)
+* [Dépôt de référence - Attaque de Bleichenbacher](https://github.com)
