@@ -96,6 +96,7 @@ J'ai rencontré des difficultés, notamment pour implémenter les fonctions `inv
 
 ## Références et Liens utiles
 * [Chiffrement RSA - Wikipédia](https://wikipedia.org)
+* [Indicatrice d'Euler](https://fr.wikipedia.org/wiki/Indicatrice_d%27Euler)
 * [Théorème de Bachet-Bézout - Wikipédia](https://wikipedia.org)
 * [Standard PKCS 1 - Wikipedia (en)](https://wikipedia.org)
 * [Dépôt de référence - Attaque de Bleichenbacher](https://github.com)
