@@ -1,4 +1,3 @@
-from math import ceil, sqrt
 from random import getrandbits, randrange
 
 def miller_rabin(num, k=40):
@@ -107,8 +106,13 @@ def decrypt(cipher_message, private_key):
     return pow(cipher_message, private_key[0], private_key[1])
 
 
-key = genereKeys()
-m = 42
-c = encrypt(m, key['public'])
-d = decrypt(c, key['private'])
-print(f"Original: {m} -> Ciphered : {c} -> Decipher : {d}")
+if __name__ == "__main__":
+    key = genereKeys()
+    m = 42
+    c = encrypt(m, key['public'])
+    d = decrypt(c, key['private'])
+    print(f"Original : {m}")
+    print(f"Chiffré  : {c}")
+    print(f"Déchiffré: {d}")
+    assert d == m, "Le déchiffrement ne restitue pas le message d'origine"
+    print("OK : decrypt(encrypt(m)) == m")

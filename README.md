@@ -85,9 +85,29 @@ Chaque attaque dispose de son propre script de démonstration pour prouver sa fa
   python attacks/bleichenbacher.py
   ```
 
+### Temps d'exécution attendus
+
+Toutes les clés sont générées en 2048 bits (deux premiers de 1024 bits), sans
+bibliothèque tierce : la génération domine le temps de calcul. Mesures sur une
+machine de bureau ordinaire :
+
+| Script | Durée typique | Sortie |
+|---|---|---|
+| `rsa.py` | ~10 s | vérifie que `decrypt(encrypt(m)) == m` |
+| `attacks/small_e.py` | ~40 s | retrouve le message sans factoriser `n` |
+| `attacks/common_modulus.py` | ~5 s | retrouve le message sans aucune clé privée |
+| `attacks/bleichenbacher.py` | ~30 s | trouve le premier `s` accepté par l'oracle |
+
+Chaque script se termine par une assertion : un code de sortie 0 signifie que
+l'attaque a réellement abouti, pas seulement que le script s'est exécuté.
+
 ## Structure du projet
-* `rsa.py` : Fonctions mathématiques de base (PGCD, inverse modulaire, exponentiation) et logique RSA.
-* `attacks/` : Dossier contenant les scripts des différentes attaques implémentées.
+* `rsa.py` : primitives mathématiques (Miller-Rabin, PGCD, inverse modulaire,
+  exponentiation modulaire) et logique RSA. Importable sans effet de bord —
+  la démonstration est sous `if __name__ == "__main__"`.
+* `attacks/small_e.py` : attaque par exposant faible (`e = 3`).
+* `attacks/common_modulus.py` : attaque par module commun.
+* `attacks/bleichenbacher.py` : padding PKCS#1 v1.5 et oracle de padding.
   
 ## Réflexion
 Ce projet m'a permis de comprendre les bases du chiffrement RSA, en partant de sa logique conceptuelle jusqu'aux fonctions mathématiques qui se cachent derrière. 
@@ -95,8 +115,10 @@ Ce projet m'a permis de comprendre les bases du chiffrement RSA, en partant de s
 J'ai rencontré des difficultés, notamment pour implémenter les fonctions `inverseModulaire()` et `addPadding()`. En développant ces fonctions, j'ai appris à utiliser de nouvelles méthodes natives de Python (telles que `bit_length()`, `to_bytes()`, `from_bytes()`, etc.). Au terme de ce projet, je suis désormais en mesure d'expliquer le fonctionnement de RSA ainsi que les attaques auxquelles il est vulnérable.
 
 ## Références et Liens utiles
-* [Chiffrement RSA - Wikipédia](https://wikipedia.org)
+* [Chiffrement RSA — Wikipédia](https://fr.wikipedia.org/wiki/Chiffrement_RSA)
 * [Indicatrice d'Euler - Wikipédia](https://fr.wikipedia.org/wiki/Indicatrice_d%27Euler)
-* [Théorème de Bachet-Bézout - Wikipédia](https://wikipedia.org)
-* [Standard PKCS 1 - Wikipedia (en)](https://wikipedia.org)
-* [Dépôt de référence - Attaque de Bleichenbacher](https://github.com)
+* [Théorème de Bachet-Bézout — Wikipédia](https://fr.wikipedia.org/wiki/Th%C3%A9or%C3%A8me_de_Bachet-B%C3%A9zout)
+* [PKCS #1 — Wikipedia (en)](https://en.wikipedia.org/wiki/PKCS_1)
+* [RFC 8017 — PKCS #1 v2.2](https://www.rfc-editor.org/rfc/rfc8017)
+* [Test de primalité de Miller-Rabin — Wikipédia](https://fr.wikipedia.org/wiki/Test_de_primalit%C3%A9_de_Miller-Rabin)
+* Bleichenbacher, D. (1998). *Chosen Ciphertext Attacks Against Protocols Based on the RSA Encryption Standard PKCS #1*, CRYPTO ’98.

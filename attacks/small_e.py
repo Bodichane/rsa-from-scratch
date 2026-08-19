@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+# Permet de lancer ce script directement depuis la racine du dépôt :
+#   python attacks/<script>.py
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from rsa import genereKeys, encrypt
 
 def integerCubeRoot(n):
@@ -25,17 +32,23 @@ def attackSmallE(c):
     return integerCubeRoot(c)
 
 
-e = 3
-message = 285
+if __name__ == "__main__":
+    e = 3
+    message = 285
 
-while True:
-    key = genereKeys(bits=1024, e=e)
-    n = key['public']
-    
-    if (message ** e) < n:
-        break
+    # On tire une clé jusqu'à obtenir m^e < n : c'est la condition qui rend
+    # l'attaque possible (le modulo ne « replie » jamais le chiffré).
+    while True:
+        key = genereKeys(bits=1024, e=e)
+        _, n = key['public']
+        if (message ** e) < n:
+            break
 
-c = encrypt(message, (e, n))
-m = attackSmallE(c)
+    c = encrypt(message, (e, n))
+    retrouve = attackSmallE(c)
 
-print(f"Original: {message} -> Ciphered: {c} -> Deciphered: {m}")
+    print(f"Message   : {message}")
+    print(f"Chiffré   : {c}")
+    print(f"Retrouvé  : {retrouve}")
+    assert retrouve == message, "L'attaque n'a pas retrouvé le message"
+    print("OK : message retrouvé sans factoriser n")

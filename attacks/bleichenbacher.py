@@ -1,4 +1,12 @@
 from os import urandom
+
+import sys
+from pathlib import Path
+
+# Permet de lancer ce script directement depuis la racine du dépôt :
+#   python attacks/<script>.py
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from rsa import encrypt, decrypt, genereKeys
 
 def addPadding(message, n):
@@ -67,8 +75,22 @@ def find(c, e, n, private_key):
         s += 1
 
 
-key = genereKeys()
-padded = addPadding(42, key['public'][1])
-c = encrypt(padded, key['public'])
-s = find(c, key['public'][0], key['public'][1], key['private'])
-print(f"First valid s : {s}")
+if __name__ == "__main__":
+    message = 42
+    key = genereKeys()
+    _, n = key['public']
+
+    padded = addPadding(message, n)
+    c = encrypt(padded, key['public'])
+
+    # Phase 1 de Bleichenbacher : trouver le premier multiplicateur s tel que
+    # c * s^e mod n soit encore accepté par l'oracle de padding.
+    s = find(c, key['public'][0], n, key['private'])
+
+    print(f"Message        : {message}")
+    print(f"Premier s valide : {s}")
+
+    # Vérifie que le padding fait bien l'aller-retour.
+    assert removingPadding(decrypt(c, key['private']), n) == message, \
+        "Le padding PKCS#1 ne fait pas l'aller-retour"
+    print("OK : padding PKCS#1 v1.5 valide et oracle fonctionnel")

@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+# Permet de lancer ce script directement depuis la racine du dépôt :
+#   python attacks/<script>.py
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from rsa import inverseModulaire, genereKeys, encrypt, pgcd
 
 def euclideEtendu(a, b):
@@ -38,18 +45,24 @@ def attackCommonModulus(c1, c2, e1, e2, n):
     return (part1 * part2) % n
 
 
-message = 42
-e1, e2 = 65537, 17
+if __name__ == "__main__":
+    message = 42
+    e1, e2 = 65537, 17
 
-while True:
-    key = genereKeys(bits=1024, e=e1)
-    if pgcd(e2, key['phi']) == 1:
-        break
+    # Les deux exposants doivent être inversibles modulo phi(n) pour que
+    # les deux chiffrements soient valides sur le même module n.
+    while True:
+        key = genereKeys(bits=1024, e=e1)
+        if pgcd(e2, key['phi']) == 1:
+            break
 
-n = key['public'][1]
+    _, n = key['public']
+    c1 = encrypt(message, (e1, n))
+    c2 = encrypt(message, (e2, n))
 
-c1 = encrypt(message, (e1, n))
-c2 = encrypt(message, (e2, n))
+    retrouve = attackCommonModulus(c1, c2, e1, e2, n)
 
-m = attackCommonModulus(c1, c2, e1, e2, n)
-print(f"Message find: {m}")
+    print(f"Message  : {message}")
+    print(f"Retrouvé : {retrouve}")
+    assert retrouve == message, "L'attaque n'a pas retrouvé le message"
+    print("OK : message retrouvé sans aucune clé privée")
