@@ -7,7 +7,7 @@ from pathlib import Path
 #   python attacks/<script>.py
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from rsa import encrypt, decrypt, genereKeys
+from rsa import encrypt, decrypt, generate_keys
 
 def addPadding(message, n):
     """
@@ -77,7 +77,7 @@ def find(c, e, n, private_key):
 
 if __name__ == "__main__":
     message = 42
-    key = genereKeys()
+    key = generate_keys()
     _, n = key['public']
 
     padded = addPadding(message, n)

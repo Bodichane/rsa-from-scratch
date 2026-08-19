@@ -32,7 +32,7 @@ def miller_rabin(num, k=40):
 
     return True  
  
-def generePrime(bits):
+def generate_prime(bits):
     """
     Generate a random prime of the given bit size.
     Uses Miller-Rabin to validate primality efficiently.
@@ -44,7 +44,7 @@ def generePrime(bits):
         if miller_rabin(num):
             return num 
     
-def pgcd(a, b):
+def gcd(a, b):
     """
     Compute the greatest common divisor (GCD) of two numbers.
     Iterative version (Euclid's algorithm) to avoid RecursionError on large integers.
@@ -53,7 +53,7 @@ def pgcd(a, b):
         a, b = b, a % b
     return a
 
-def inverseModulaire(e, phi):
+def mod_inverse(e, phi):
     """
     Compute the modular inverse of e modulo phi such that (e * d) % phi == 1.
     Uses the iterative extended Euclidean algorithm.
@@ -70,21 +70,21 @@ def inverseModulaire(e, phi):
 
     return x_prec % phi
     
-def genereKeys(bits=1024, e=65537):
+def generate_keys(bits=1024, e=65537):
     """
     Generate an RSA key pair (public and private) along with the intermediate parameters.
     By default, generates 1024-bit primes for a 2048-bit modulus n.
     """
     while True:
-        p = generePrime(bits)
-        q = generePrime(bits)
+        p = generate_prime(bits)
+        q = generate_prime(bits)
 
         if p != q:
             n = p * q
             phi = (p - 1) * (q - 1)
 
-            if pgcd(e, phi) == 1:
-                d = inverseModulaire(e, phi)
+            if gcd(e, phi) == 1:
+                d = mod_inverse(e, phi)
                 return { 'public': (e, n),
                         'private': (d, n),
                         'p': p,
@@ -107,7 +107,7 @@ def decrypt(cipher_message, private_key):
 
 
 if __name__ == "__main__":
-    key = genereKeys()
+    key = generate_keys()
     m = 42
     c = encrypt(m, key['public'])
     d = decrypt(c, key['private'])

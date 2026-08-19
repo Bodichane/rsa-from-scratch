@@ -5,9 +5,9 @@ from pathlib import Path
 #   python attacks/<script>.py
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from rsa import inverseModulaire, genereKeys, encrypt, pgcd
+from rsa import mod_inverse, generate_keys, encrypt, gcd
 
-def euclideEtendu(a, b):
+def extended_euclid(a, b):
     """
     Compute the GCD and Bézout coefficients iteratively.
     Avoids RecursionError on large integers.
@@ -25,19 +25,19 @@ def attackCommonModulus(c1, c2, e1, e2, n):
     Run the RSA common-modulus attack using Bézout's identity.
     Recovers the original message encrypted under two different exponents e1 and e2.
     """
-    g, a, b = euclideEtendu(e1, e2)
+    g, a, b = extended_euclid(e1, e2)
     
     if g != 1:
         return None
 
     if a < 0:
-        inv_c1 = inverseModulaire(c1, n)
+        inv_c1 = mod_inverse(c1, n)
         part1 = pow(inv_c1, -a, n)
     else:
         part1 = pow(c1, a, n)
 
     if b < 0:
-        inv_c2 = inverseModulaire(c2, n)
+        inv_c2 = mod_inverse(c2, n)
         part2 = pow(inv_c2, -b, n)
     else:
         part2 = pow(c2, b, n)
@@ -52,8 +52,8 @@ if __name__ == "__main__":
     # Both exponents must be invertible modulo phi(n) so that the two
     # encryptions are valid under the same modulus n.
     while True:
-        key = genereKeys(bits=1024, e=e1)
-        if pgcd(e2, key['phi']) == 1:
+        key = generate_keys(bits=1024, e=e1)
+        if gcd(e2, key['phi']) == 1:
             break
 
     _, n = key['public']

@@ -17,7 +17,7 @@ of two integers $d$ and $k$ such that:
 $$ed = 1 + k\phi(n)$$
 <br>This means $ed \equiv 1 \pmod{\phi(n)}$, which proves that $e$ is invertible
 modulo $\phi(n)$. This property allows computing the decryption exponent:
-`d = inverseModulaire(e, phi)`.
+`d = mod_inverse(e, phi)`.
 
 ### Euler's totient $\phi(n)$
 An integer $p > 1$ is prime if and only if all numbers from $1$ to $p - 1$ are
@@ -133,7 +133,7 @@ succeeded, not merely that the script ran.
 This project helped me understand the fundamentals of RSA encryption, from its
 conceptual logic down to the mathematical functions behind it.
 
-I ran into difficulties, particularly implementing the `inverseModulaire()` and
+I ran into difficulties, particularly implementing the `mod_inverse()` and
 `addPadding()` functions. While developing them, I learned to use new native
 Python methods (such as `bit_length()`, `to_bytes()`, `from_bytes()`, etc.). By
 the end of this project, I am now able to explain how RSA works as well as the

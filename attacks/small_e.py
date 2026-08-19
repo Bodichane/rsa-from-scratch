@@ -5,7 +5,7 @@ from pathlib import Path
 #   python attacks/<script>.py
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from rsa import genereKeys, encrypt
+from rsa import generate_keys, encrypt
 
 def integerCubeRoot(n):
     """
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # Draw keys until m^e < n: this is the condition that makes the attack
     # possible (the modulus never wraps the ciphertext).
     while True:
-        key = genereKeys(bits=1024, e=e)
+        key = generate_keys(bits=1024, e=e)
         _, n = key['public']
         if (message ** e) < n:
             break
