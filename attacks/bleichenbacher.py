@@ -3,7 +3,7 @@ from os import urandom
 import sys
 from pathlib import Path
 
-# Permet de lancer ce script directement depuis la racine du dépôt :
+# Allows running this script directly from the repository root:
 #   python attacks/<script>.py
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -11,8 +11,8 @@ from rsa import encrypt, decrypt, genereKeys
 
 def addPadding(message, n):
     """
-    Ajoute un padding conforme aux spécifications PKCS#1 v1.5 à un message entier.
-    Garantit que la chaîne d'octets finale fait exactement la même taille que le module n.
+    Add PKCS#1 v1.5-compliant padding to an integer message.
+    Ensures the final byte string is exactly the same size as the modulus n.
     """
     n_size = (n.bit_length() + 7) // 8
     message_size = (message.bit_length() + 7) // 8
@@ -30,8 +30,8 @@ def addPadding(message, n):
 
 def removingPadding(padded_int, n):
     """
-    Supprime le padding PKCS#1 v1.5 d'un entier déchiffré pour retrouver le message initial.
-    Vérifie la présence des marqueurs 0x00 et 0x02.
+    Strip PKCS#1 v1.5 padding from a decrypted integer to recover the original message.
+    Checks for the 0x00 and 0x02 markers.
     """
     padded_size = (n.bit_length() + 7) // 8
     padded_bytes = padded_int.to_bytes(padded_size, 'big')
@@ -45,8 +45,8 @@ def removingPadding(padded_int, n):
 
 def oracle(c, private_key):
     """
-    Simule un oracle de padding RSA.
-    Retourne True si le message déchiffré respecte la structure PKCS#1 v1.5, False sinon.
+    Simulate an RSA padding oracle.
+    Returns True if the decrypted message follows the PKCS#1 v1.5 structure, False otherwise.
     """
     n = private_key[1]
     n_size = (n.bit_length() + 7) // 8
@@ -60,8 +60,8 @@ def oracle(c, private_key):
 
 def find(c, e, n, private_key):
     """
-    Première phase de l'attaque de Bleichenbacher.
-    Recherche le premier multiplicateur s valide supérieur à la borne mathématique initiale.
+    First phase of the Bleichenbacher attack.
+    Searches for the first valid multiplier s above the initial mathematical bound.
     """
     n_size = (n.bit_length() + 7) // 8
     B = 1 << (8 * (n_size - 2))
@@ -83,14 +83,14 @@ if __name__ == "__main__":
     padded = addPadding(message, n)
     c = encrypt(padded, key['public'])
 
-    # Phase 1 de Bleichenbacher : trouver le premier multiplicateur s tel que
-    # c * s^e mod n soit encore accepté par l'oracle de padding.
+    # Bleichenbacher phase 1: find the first multiplier s such that
+    # c * s^e mod n is still accepted by the padding oracle.
     s = find(c, key['public'][0], n, key['private'])
 
-    print(f"Message        : {message}")
-    print(f"Premier s valide : {s}")
+    print(f"Message          : {message}")
+    print(f"First valid s    : {s}")
 
-    # Vérifie que le padding fait bien l'aller-retour.
+    # Check that the padding round-trips correctly.
     assert removingPadding(decrypt(c, key['private']), n) == message, \
-        "Le padding PKCS#1 ne fait pas l'aller-retour"
-    print("OK : padding PKCS#1 v1.5 valide et oracle fonctionnel")
+        "PKCS#1 padding does not round-trip"
+    print("OK: PKCS#1 v1.5 padding valid and oracle working")

@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-# Permet de lancer ce script directement depuis la racine du dépôt :
+# Allows running this script directly from the repository root:
 #   python attacks/<script>.py
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -9,8 +9,8 @@ from rsa import inverseModulaire, genereKeys, encrypt, pgcd
 
 def euclideEtendu(a, b):
     """
-    Calcule le PGCD et les coefficients de Bézout de manière itérative.
-    Évite l'erreur RecursionError sur des entiers de grande taille.
+    Compute the GCD and Bézout coefficients iteratively.
+    Avoids RecursionError on large integers.
     """
     x0, x1, y0, y1 = 1, 0, 0, 1
     while b != 0:
@@ -22,8 +22,8 @@ def euclideEtendu(a, b):
 
 def attackCommonModulus(c1, c2, e1, e2, n):
     """
-    Exécute l'attaque par module commun RSA en utilisant l'identité de Bézout.
-    Retrouve le message d'origine chiffré sous deux exposants e1 et e2 différents.
+    Run the RSA common-modulus attack using Bézout's identity.
+    Recovers the original message encrypted under two different exponents e1 and e2.
     """
     g, a, b = euclideEtendu(e1, e2)
     
@@ -49,8 +49,8 @@ if __name__ == "__main__":
     message = 42
     e1, e2 = 65537, 17
 
-    # Les deux exposants doivent être inversibles modulo phi(n) pour que
-    # les deux chiffrements soient valides sur le même module n.
+    # Both exponents must be invertible modulo phi(n) so that the two
+    # encryptions are valid under the same modulus n.
     while True:
         key = genereKeys(bits=1024, e=e1)
         if pgcd(e2, key['phi']) == 1:
@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     retrouve = attackCommonModulus(c1, c2, e1, e2, n)
 
-    print(f"Message  : {message}")
-    print(f"Retrouvé : {retrouve}")
-    assert retrouve == message, "L'attaque n'a pas retrouvé le message"
-    print("OK : message retrouvé sans aucune clé privée")
+    print(f"Message   : {message}")
+    print(f"Recovered : {retrouve}")
+    assert retrouve == message, "The attack did not recover the message"
+    print("OK: message recovered without any private key")

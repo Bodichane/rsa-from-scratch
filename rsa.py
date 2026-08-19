@@ -2,8 +2,8 @@ from random import getrandbits, randrange
 
 def miller_rabin(num, k=40):
     """
-    Test de primalité de Miller-Rabin.
-    k est le nombre de rounds de vérification (40 rounds = certitude quasi absolue).
+    Miller-Rabin primality test.
+    k is the number of verification rounds (40 rounds = near-absolute certainty).
     """
     if num == 2 or num == 3:
         return True
@@ -34,8 +34,8 @@ def miller_rabin(num, k=40):
  
 def generePrime(bits):
     """
-    Génère un nombre premier aléatoire de la taille spécifiée en bits.
-    Utilise Miller-Rabin pour valider la primalité de manière efficace.
+    Generate a random prime of the given bit size.
+    Uses Miller-Rabin to validate primality efficiently.
     """
     while True:
         num = getrandbits(bits) | 1
@@ -46,8 +46,8 @@ def generePrime(bits):
     
 def pgcd(a, b):
     """
-    Calcule le Plus Grand Commun Diviseur (PGCD) de deux nombres.
-    Version itérative (algorithme d'Euclide) pour éviter l'erreur RecursionError sur les grands entiers.
+    Compute the greatest common divisor (GCD) of two numbers.
+    Iterative version (Euclid's algorithm) to avoid RecursionError on large integers.
     """
     while b != 0:
         a, b = b, a % b
@@ -55,8 +55,8 @@ def pgcd(a, b):
 
 def inverseModulaire(e, phi):
     """
-    Calcule l'inverse modulaire de e modulo phi tel que (e * d) % phi == 1.
-    Utilise l'algorithme d'Euclide étendu de manière itérative.
+    Compute the modular inverse of e modulo phi such that (e * d) % phi == 1.
+    Uses the iterative extended Euclidean algorithm.
     """
     r_prec, r_act = e, phi
     x_prec, x_act = 1, 0
@@ -72,8 +72,8 @@ def inverseModulaire(e, phi):
     
 def genereKeys(bits=1024, e=65537):
     """
-    Génère une paire de clés RSA (publique et privée) ainsi que les paramètres intermédiaires.
-    Par défaut, génère des nombres premiers de 1024 bits pour un module n de 2048 bits.
+    Generate an RSA key pair (public and private) along with the intermediate parameters.
+    By default, generates 1024-bit primes for a 2048-bit modulus n.
     """
     while True:
         p = generePrime(bits)
@@ -93,15 +93,15 @@ def genereKeys(bits=1024, e=65537):
         
 def encrypt(message, public_key):
     """
-    Chiffre un message entier à l'aide de la clé publique RSA.
-    Utilise l'exponentiation modulaire rapide native de Python : (message^e) % n.
+    Encrypt an integer message with the RSA public key.
+    Uses Python's fast built-in modular exponentiation: (message^e) % n.
     """
     return pow(message, public_key[0], public_key[1])
 
 def decrypt(cipher_message, private_key):
     """
-    Déchiffre un message crypté à l'aide de la clé privée RSA.
-    Utilise l'exponentiation modulaire rapide native de Python : (cipher_message^d) % n.
+    Decrypt an encrypted message with the RSA private key.
+    Uses Python's fast built-in modular exponentiation: (cipher_message^d) % n.
     """
     return pow(cipher_message, private_key[0], private_key[1])
 
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     c = encrypt(m, key['public'])
     d = decrypt(c, key['private'])
     print(f"Original : {m}")
-    print(f"Chiffré  : {c}")
-    print(f"Déchiffré: {d}")
-    assert d == m, "Le déchiffrement ne restitue pas le message d'origine"
-    print("OK : decrypt(encrypt(m)) == m")
+    print(f"Ciphertext: {c}")
+    print(f"Decrypted : {d}")
+    assert d == m, "Decryption does not recover the original message"
+    print("OK: decrypt(encrypt(m)) == m")

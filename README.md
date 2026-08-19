@@ -1,124 +1,149 @@
 # RSA From Scratch
 
 ## Description
-Ce projet est une implémentation de l'algorithme RSA à partir de zéro, sans aucune utilisation de bibliothèques cryptographiques. Nous avons également implémenté quelques attaques pour tenter de casser cette méthode de chiffrement.
+This project is an implementation of the RSA algorithm from scratch, without any
+cryptographic libraries. It also implements a few attacks to try to break this
+encryption scheme.
 
-## Concepts mathématiques
+## Mathematical concepts
 
-### PGCD 
-Utilisé pour vérifier que l'indicatrice d'Euler $\phi(n)$ et l'exposant de chiffrement $e$ sont premiers entre eux. 
+### GCD
+Used to check that Euler's totient $\phi(n)$ and the encryption exponent $e$ are
+coprime.
 
-### Inverse modulaire
-Puisque $e$ est premier avec $\phi(n)$, le théorème de Bachet-Bézout garantit l'existence de deux entiers $d$ et $k$ tels que :
+### Modular inverse
+Since $e$ is coprime with $\phi(n)$, the Bézout theorem guarantees the existence
+of two integers $d$ and $k$ such that:
 $$ed = 1 + k\phi(n)$$
-<br>Cela signifie que $ed \equiv 1 \pmod{\phi(n)}$, ce qui prouve que $e$ est inversible modulo $\phi(n)$. Cette propriété permet de calculer l'exposant de déchiffrement : `d = inverseModulaire(e, phi)`.
+<br>This means $ed \equiv 1 \pmod{\phi(n)}$, which proves that $e$ is invertible
+modulo $\phi(n)$. This property allows computing the decryption exponent:
+`d = inverseModulaire(e, phi)`.
 
-### Fonction phi d'Euler $\phi(n)$
-Un entier $p > 1$ est premier si et seulement si tous les nombres de $1$ à $p - 1$ sont premiers avec $p$. On a alors $\phi(p) = p - 1$. Dans le cas de RSA, pour deux nombres premiers $p$ et $q$, on obtient :
+### Euler's totient $\phi(n)$
+An integer $p > 1$ is prime if and only if all numbers from $1$ to $p - 1$ are
+coprime with $p$. We then have $\phi(p) = p - 1$. In the RSA case, for two primes
+$p$ and $q$, we get:
 $$\phi(n) = (p - 1)(q - 1)$$
-<br>Cette valeur est essentielle pour générer la clé privée du système.
+<br>This value is essential to generate the system's private key.
 
-### Exponentiation modulaire
-L'exponentiation modulaire consiste à calculer l'entier $c$ tel que :
+### Modular exponentiation
+Modular exponentiation computes the integer $c$ such that:
 $$c \equiv m^e \pmod n$$
-<br>Cette formule permet de chiffrer efficacement le message $m$ à l'aide de l'exposant $e$ et du module $n$.
+<br>This formula encrypts the message $m$ efficiently using the exponent $e$ and
+the modulus $n$.
 
 ---
 
-## Attaques implémentées
+## Implemented attacks
 
-### Attaque par exposant faible (Small $e$)
-Cette attaque peut être exploitée lorsque la valeur de l'exposant de chiffrement est très petite (généralement $e = 3$). Si le message $m$ est court, on peut se retrouver dans le cas où $m^3 < n$. 
-Le chiffrement devient alors une simple puissance : 
+### Low-exponent attack (Small $e$)
+This attack can be exploited when the encryption exponent is very small
+(typically $e = 3$). If the message $m$ is short, we may end up with $m^3 < n$.
+Encryption then becomes a simple power:
 $$c \equiv m^3 \pmod n \implies c = m^3$$
-<br>Il suffit alors de calculer la racine cubique classique de $c$ dans les entiers pour retrouver le message en clair, sans avoir à factoriser $n$.
+<br>It is then enough to compute the ordinary cube root of $c$ over the integers
+to recover the plaintext, without factoring $n$.
 
-### Attaque par module commun (Common Modulus)
-Cette attaque est réalisable lorsque deux utilisateurs partagent le même module $n$ mais possèdent des exposants de chiffrement $e_1$ et $e_2$ différents pour chiffrer le même message $m$.
-On dispose de :
-$$c_1 \equiv m^{e_1} \pmod n \quad \text{et} \quad c_2 \equiv m^{e_2} \pmod n$$
-<br>Si $\text{pgcd}(e_1, e_2) = 1$, le théorème de Bachet-Bézout assure qu'il existe deux entiers $a$ et $b$ tels que :
+### Common-modulus attack
+This attack is possible when two users share the same modulus $n$ but have
+different encryption exponents $e_1$ and $e_2$ to encrypt the same message $m$.
+We have:
+$$c_1 \equiv m^{e_1} \pmod n \quad \text{and} \quad c_2 \equiv m^{e_2} \pmod n$$
+<br>If $\gcd(e_1, e_2) = 1$, the Bézout theorem guarantees that there exist two
+integers $a$ and $b$ such that:
 $$a \cdot e_1 + b \cdot e_2 = 1$$
-<br>En appliquant l'algorithme d'Euclide étendu, on calcule $a$ et $b$ (l'un des deux étant négatif, on utilise l'inverse modulaire). On retrouve ensuite le message d'origine ainsi :
+<br>Using the extended Euclidean algorithm, we compute $a$ and $b$ (one of them
+being negative, we use the modular inverse). We then recover the original message
+as:
 $$(c_1)^a \cdot (c_2)^b \equiv (m^{e_1})^a \cdot (m^{e_2})^b \equiv m^{a \cdot e_1 + b \cdot e_2} \equiv m^1 \equiv m \pmod n$$
-<br>Le message est ainsi intercepté sans nécessiter la connaissance des clés privées.
+<br>The message is thus intercepted without knowing the private keys.
 
-### Attaque de Bleichenbacher (Oracle de padding PKCS#1)
-Cette attaque par canal auxiliaire (*side-channel*) se base sur un serveur agissant comme un oracle de padding. Le serveur renvoie une information (ou une erreur différente) selon que le padding du message déchiffré est valide (`True`) ou invalide (`False`). 
-L'objectif est de découvrir le message en choisissant judicieusement des entiers $s$ successifs, en envoyant au serveur le texte chiffré modifié :
+### Bleichenbacher attack (PKCS#1 padding oracle)
+This side-channel attack relies on a server acting as a padding oracle. The
+server returns information (or a different error) depending on whether the
+padding of the decrypted message is valid (`True`) or invalid (`False`).
+The goal is to recover the message by carefully choosing successive integers $s$
+and sending the modified ciphertext to the server:
 $$c' \equiv c \cdot s^e \pmod n$$
-<br>En analysant les réponses de l'oracle pour différents choix de $s$, on réduit progressivement l'intervalle des valeurs possibles pour le message jusqu'à l'isoler complètement.
+<br>By analyzing the oracle's responses for different choices of $s$, we
+progressively narrow the interval of possible values for the message until it is
+fully isolated.
 
 ---
 
-## Installation et Utilisation
+## Installation and usage
 
-### Prérequis
-Ce projet est développé en **Python 3**. Aucune bibliothèque tierce n'est requise puisque toutes les fonctions (RSA et attaques) sont codées à partir de zéro.
+### Prerequisites
+This project is developed in **Python 3**. No third-party library is required
+since all functions (RSA and attacks) are coded from scratch.
 
-### 1. Cloner le projet
-Téléchargez le dépôt localement sur votre machine :
+### 1. Clone the project
 ```bash
 git clone https://github.com/Bodichane/rsa-from-scratch
 cd rsa-from-scratch
 ```
 
-### 2. Exécuter le chiffrement/déchiffrement RSA
-Pour générer des clés, chiffrer et déchiffrer un message de démonstration :
+### 2. Run RSA encryption/decryption
+To generate keys, encrypt and decrypt a demonstration message:
 ```bash
 python rsa.py
 ```
 
-### 3. Lancer les simulations d'attaques
-Chaque attaque dispose de son propre script de démonstration pour prouver sa faisabilité :
+### 3. Run the attack simulations
+Each attack has its own demonstration script proving its feasibility:
 
-* **Attaque Small $e$** :
+* **Small $e$ attack**:
   ```bash
   python attacks/small_e.py
   ```
-* **Attaque par module commun** :
+* **Common-modulus attack**:
   ```bash
   python attacks/common_modulus.py
   ```
-* **Attaque de Bleichenbacher** :
+* **Bleichenbacher attack**:
   ```bash
   python attacks/bleichenbacher.py
   ```
 
-### Temps d'exécution attendus
+### Expected run times
 
-Toutes les clés sont générées en 2048 bits (deux premiers de 1024 bits), sans
-bibliothèque tierce : la génération domine le temps de calcul. Mesures sur une
-machine de bureau ordinaire :
+All keys are generated at 2048 bits (two 1024-bit primes), without any
+third-party library: key generation dominates the compute time. Measured on an
+ordinary desktop machine:
 
-| Script | Durée typique | Sortie |
+| Script | Typical time | Output |
 |---|---|---|
-| `rsa.py` | ~10 s | vérifie que `decrypt(encrypt(m)) == m` |
-| `attacks/small_e.py` | ~40 s | retrouve le message sans factoriser `n` |
-| `attacks/common_modulus.py` | ~5 s | retrouve le message sans aucune clé privée |
-| `attacks/bleichenbacher.py` | ~30 s | trouve le premier `s` accepté par l'oracle |
+| `rsa.py` | ~10 s | checks that `decrypt(encrypt(m)) == m` |
+| `attacks/small_e.py` | ~40 s | recovers the message without factoring `n` |
+| `attacks/common_modulus.py` | ~5 s | recovers the message without any private key |
+| `attacks/bleichenbacher.py` | ~30 s | finds the first `s` accepted by the oracle |
 
-Chaque script se termine par une assertion : un code de sortie 0 signifie que
-l'attaque a réellement abouti, pas seulement que le script s'est exécuté.
+Each script ends with an assertion: an exit code of 0 means the attack actually
+succeeded, not merely that the script ran.
 
-## Structure du projet
-* `rsa.py` : primitives mathématiques (Miller-Rabin, PGCD, inverse modulaire,
-  exponentiation modulaire) et logique RSA. Importable sans effet de bord —
-  la démonstration est sous `if __name__ == "__main__"`.
-* `attacks/small_e.py` : attaque par exposant faible (`e = 3`).
-* `attacks/common_modulus.py` : attaque par module commun.
-* `attacks/bleichenbacher.py` : padding PKCS#1 v1.5 et oracle de padding.
-  
-## Réflexion
-Ce projet m'a permis de comprendre les bases du chiffrement RSA, en partant de sa logique conceptuelle jusqu'aux fonctions mathématiques qui se cachent derrière. 
+## Project structure
+* `rsa.py`: core mathematical primitives (Miller-Rabin, GCD, modular inverse,
+  modular exponentiation) and RSA logic. Importable with no side effects — the
+  demonstration is under `if __name__ == "__main__"`.
+* `attacks/small_e.py`: low-exponent attack (`e = 3`).
+* `attacks/common_modulus.py`: common-modulus attack.
+* `attacks/bleichenbacher.py`: PKCS#1 v1.5 padding and padding oracle.
 
-J'ai rencontré des difficultés, notamment pour implémenter les fonctions `inverseModulaire()` et `addPadding()`. En développant ces fonctions, j'ai appris à utiliser de nouvelles méthodes natives de Python (telles que `bit_length()`, `to_bytes()`, `from_bytes()`, etc.). Au terme de ce projet, je suis désormais en mesure d'expliquer le fonctionnement de RSA ainsi que les attaques auxquelles il est vulnérable.
+## Reflection
+This project helped me understand the fundamentals of RSA encryption, from its
+conceptual logic down to the mathematical functions behind it.
 
-## Références et Liens utiles
-* [Chiffrement RSA — Wikipédia](https://fr.wikipedia.org/wiki/Chiffrement_RSA)
-* [Indicatrice d'Euler - Wikipédia](https://fr.wikipedia.org/wiki/Indicatrice_d%27Euler)
-* [Théorème de Bachet-Bézout — Wikipédia](https://fr.wikipedia.org/wiki/Th%C3%A9or%C3%A8me_de_Bachet-B%C3%A9zout)
-* [PKCS #1 — Wikipedia (en)](https://en.wikipedia.org/wiki/PKCS_1)
+I ran into difficulties, particularly implementing the `inverseModulaire()` and
+`addPadding()` functions. While developing them, I learned to use new native
+Python methods (such as `bit_length()`, `to_bytes()`, `from_bytes()`, etc.). By
+the end of this project, I am now able to explain how RSA works as well as the
+attacks it is vulnerable to.
+
+## References and useful links
+* [RSA encryption — Wikipedia](https://en.wikipedia.org/wiki/RSA_(cryptosystem))
+* [Euler's totient function — Wikipedia](https://en.wikipedia.org/wiki/Euler%27s_totient_function)
+* [Bézout's identity — Wikipedia](https://en.wikipedia.org/wiki/B%C3%A9zout%27s_identity)
+* [PKCS #1 — Wikipedia](https://en.wikipedia.org/wiki/PKCS_1)
 * [RFC 8017 — PKCS #1 v2.2](https://www.rfc-editor.org/rfc/rfc8017)
-* [Test de primalité de Miller-Rabin — Wikipédia](https://fr.wikipedia.org/wiki/Test_de_primalit%C3%A9_de_Miller-Rabin)
+* [Miller-Rabin primality test — Wikipedia](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test)
 * Bleichenbacher, D. (1998). *Chosen Ciphertext Attacks Against Protocols Based on the RSA Encryption Standard PKCS #1*, CRYPTO ’98.
